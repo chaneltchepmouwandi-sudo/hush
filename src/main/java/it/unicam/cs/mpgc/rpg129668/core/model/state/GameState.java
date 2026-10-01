@@ -56,6 +56,10 @@ public class GameState {
         return inventory.containsKey(itemId);
     }
 
+    public Optional<Item> getItem(String itemId) {
+        return Optional.ofNullable(inventory.get(itemId));
+    }
+
     public Collection<Item> getItems() {
         return Collections.unmodifiableCollection(inventory.values());
     }
