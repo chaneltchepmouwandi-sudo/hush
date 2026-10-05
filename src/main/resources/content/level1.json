@@ -1,0 +1,30 @@
+{
+  "startingRoom": "corridoio",
+  "rooms": [
+    {
+      "id": "corridoio",
+      "name": "Corridoio",
+      "description": "Un lungo corridoio buio.",
+      "exits": [
+        { "direction": "nord", "destination": "sala", "obstacle": null },
+        { "direction": "est", "destination": "ufficio", "obstacle": { "type": "door", "code": "chiave-ufficio" } }
+      ]
+    },
+    {
+      "id": "sala",
+      "name": "Sala comune",
+      "description": "Pazienti seduti in silenzio.",
+      "exits": [
+        { "direction": "sud", "destination": "corridoio", "obstacle": null }
+      ]
+    },
+    {
+      "id": "ufficio",
+      "name": "Ufficio dell'infermiera",
+      "description": "Scrivania in ordine, cassetti chiusi.",
+      "exits": [
+        { "direction": "ovest", "destination": "corridoio", "obstacle": null }
+      ]
+    }
+  ]
+}
