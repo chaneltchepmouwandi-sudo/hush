@@ -1,4 +1,4 @@
-package it.unicam.cs.mpgc.rpg129668.content;
+package it.unicam.cs.mpgc.rpg129668.content.level;
 
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import org.junit.jupiter.api.Test;

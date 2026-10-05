@@ -1,4 +1,4 @@
-package it.unicam.cs.mpgc.rpg129668.content;
+package it.unicam.cs.mpgc.rpg129668.content.level;
 
 /**
  * Rappresentazione grezza di un Obstacle così come appare nel JSON.

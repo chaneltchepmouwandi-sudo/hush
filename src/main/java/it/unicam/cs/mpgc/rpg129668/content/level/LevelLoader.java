@@ -1,4 +1,4 @@
-package it.unicam.cs.mpgc.rpg129668.content;
+package it.unicam.cs.mpgc.rpg129668.content.level;
 
 import com.google.gson.Gson;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Door;
