@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129668;
 
+import it.unicam.cs.mpgc.rpg129668.content.level.LevelLoader;
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
@@ -15,14 +16,11 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Room corridoio = new Room("corridoio", "Corridoio", "Un lungo corridoio buio.");
-        Room sala = new Room("sala", "Sala comune", "Pazienti seduti in silenzio.");
-        corridoio.addExit("nord", sala, null);
-        sala.addExit("sud", corridoio, null);
+        Room startingRoom = new LevelLoader().load("/content/level1.json");
 
-        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(corridoio));
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(startingRoom));
         GameController controller = new GameController(state, List.of(),
-                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(corridoio));
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(startingRoom));
 
         SwingUtilities.invokeLater(() -> new GameWindow(controller).setVisible(true));
     }
