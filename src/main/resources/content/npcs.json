@@ -1,0 +1,30 @@
+{
+  "npcs": [
+    {
+      "id": "elio",
+      "name": "Elio",
+      "description": "Un bambino silenzioso che scarabocchia sempre lo stesso disegno.",
+      "request": null
+    },
+    {
+      "id": "nadia",
+      "name": "Nadia",
+      "description": "Diffidente: nessuno le crede mai.",
+      "request": {
+        "id": "nadia-oggetto",
+        "condition": { "type": "hasItem", "itemId": "peluche" },
+        "rewards": [
+          { "type": "takeItem", "itemId": "peluche" },
+          { "type": "trust", "npcId": "nadia", "amount": 2 },
+          { "type": "knowledge", "knowledgeId": "sa-infermiera-ala-nord" }
+        ]
+      }
+    },
+    {
+      "id": "calla",
+      "name": "Infermiera Calla",
+      "description": "Gentile in modo quasi eccessivo.",
+      "request": null
+    }
+  ]
+}
