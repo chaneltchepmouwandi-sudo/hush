@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg129668.controller;
 import it.unicam.cs.mpgc.rpg129668.core.event.EventType;
 import it.unicam.cs.mpgc.rpg129668.core.event.GameEvent;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Guard;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.PatrolBehavior;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +27,7 @@ class GameControllerTest {
     void performingActionEmitsTurnResultEvent() {
         Room stanza = new Room("stanza", "Stanza", "...");
         GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
-        GameController controller = new GameController(state, List.of(),
+        GameController controller = new GameController(state, List.of(), List.of(), Map.of(),
                 new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanza));
 
         List<GameEvent> events = new ArrayList<>();
@@ -45,7 +47,7 @@ class GameControllerTest {
         GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanzaA));
         Guard guard = new Guard("Guardia", new PatrolBehavior(List.of(stanzaB, stanzaA)), stanzaB);
 
-        GameController controller = new GameController(state, List.of(guard),
+        GameController controller = new GameController(state, List.of(guard), List.of(), Map.of(),
                 new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanzaA));
 
         List<GameEvent> events = new ArrayList<>();
@@ -55,5 +57,19 @@ class GameControllerTest {
 
         boolean captured = events.stream().anyMatch(e -> e.type() == EventType.PLAYER_CAPTURED);
         assertTrue(captured);
+    }
+
+    @Test
+    void npcsInCurrentRoomAreReturnedByGetter() {
+        Room stanza = new Room("stanza", "Stanza", "...");
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
+        Npc elio = new Npc("elio", "Elio", "...");
+        elio.placeIn(stanza);
+
+        GameController controller = new GameController(state, List.of(), List.of(elio), Map.of(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanza));
+
+        assertEquals(1, controller.getNpcsInCurrentRoom().size());
+        assertEquals("elio", controller.getNpcsInCurrentRoom().get(0).getId());
     }
 }

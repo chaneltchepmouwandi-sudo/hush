@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129668.core.action;
 
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.HasItemCondition;
@@ -22,30 +23,29 @@ class TalkActionTest {
 
     private Item peluche() {
         return new Item() {
-            @Override
-            public String getId() {
-                return "peluche";
-            }
-
-            @Override
-            public String getName() {
-                return "Peluche";
-            }
-
-            @Override
-            public String getDescription() {
-                return "...";
-            }
+            @Override public String getId() { return "peluche"; }
+            @Override public String getName() { return "Peluche"; }
+            @Override public String getDescription() { return "..."; }
         };
+    }
+
+    @Test
+    void talkingWithoutRequestShowsDescription() {
+        Npc elio = new Npc("elio", "Elio", "Un bambino silenzioso.");
+
+        String result = new TalkAction(elio).execute(newState());
+
+        assertEquals("Elio: Un bambino silenzioso.", result);
     }
 
     @Test
     void talkingWithoutRequiredItemDoesNotGrantReward() {
         GameState state = newState();
+        Npc nadia = new Npc("nadia", "Nadia", "...");
         Request request = new Request("nadia-oggetto", new HasItemCondition("peluche"),
                 List.of(new TrustReward("nadia", 2)));
 
-        new TalkAction(request).execute(state);
+        new TalkAction(nadia, request).execute(state);
 
         assertEquals(0, state.getTrust("nadia"));
     }
@@ -54,10 +54,11 @@ class TalkActionTest {
     void talkingWithRequiredItemGrantsReward() {
         GameState state = newState();
         state.addItem(peluche());
+        Npc nadia = new Npc("nadia", "Nadia", "...");
         Request request = new Request("nadia-oggetto", new HasItemCondition("peluche"),
                 List.of(new TrustReward("nadia", 2)));
 
-        new TalkAction(request).execute(state);
+        new TalkAction(nadia, request).execute(state);
 
         assertEquals(2, state.getTrust("nadia"));
     }

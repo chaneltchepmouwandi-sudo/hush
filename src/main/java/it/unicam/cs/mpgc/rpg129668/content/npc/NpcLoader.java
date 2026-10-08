@@ -10,11 +10,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Carica gli NPC (e le eventuali Request che offrono) da un file JSON.
+ * Carica gli NPC e le eventuali Request che offrono da un file JSON.
  */
 public class NpcLoader {
 
@@ -23,11 +24,14 @@ public class NpcLoader {
     /**
      * @param resourcePath percorso del file JSON nelle risorse
      * @param roomsById stanze del livello, usate per posizionare ogni NPC nella sua roomId
-     * @return gli Npc del file, posizionati nella stanza corrispondente se roomId è valido
+     * @return gli Npc (posizionati nella stanza corrispondente) e le Request,
+     *         indicizzate per id dell'NPC a cui appartengono
      */
-    public List<Npc> load(String resourcePath, Map<String, Room> roomsById) {
+    public NpcContent load(String resourcePath, Map<String, Room> roomsById) {
         NpcListData data = readNpcListData(resourcePath);
         List<Npc> npcs = new ArrayList<>();
+        Map<String, Request> requestsByNpcId = new HashMap<>();
+
         for (NpcData npcData : data.npcs) {
             Npc npc = new Npc(npcData.id, npcData.name, npcData.description);
             Room room = roomsById.get(npcData.roomId);
@@ -35,24 +39,13 @@ public class NpcLoader {
                 npc.placeIn(room);
             }
             npcs.add(npc);
-        }
-        return npcs;
-    }
 
-    /**
-     * Carica la Request associata a un NPC, se presente nel file.
-     * Separata da load() perché Request appartiene a core.model.interaction,
-     * non a Npc stesso (vedi core.model.character.Npc).
-     */
-    public List<Request> loadRequests(String resourcePath) {
-        NpcListData data = readNpcListData(resourcePath);
-        List<Request> requests = new ArrayList<>();
-        for (NpcData npcData : data.npcs) {
             if (npcData.request != null) {
-                requests.add(createRequest(npcData.request));
+                requestsByNpcId.put(npcData.id, createRequest(npcData.request));
             }
         }
-        return requests;
+
+        return new NpcContent(npcs, requestsByNpcId);
     }
 
     private NpcListData readNpcListData(String resourcePath) {
