@@ -1,28 +1,43 @@
 package it.unicam.cs.mpgc.rpg129668.content.npc;
 
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Request;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
-import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
-import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class NpcLoaderTest {
 
+    private Map<String, Room> testRooms() {
+        return Map.of(
+                "sala", new Room("sala", "Sala comune", "..."),
+                "ufficio", new Room("ufficio", "Ufficio", "...")
+        );
+    }
+
     @Test
     void loadsAllNpcs() {
-        List<Npc> npcs = new NpcLoader().load("/content/npcs.json");
+        List<Npc> npcs = new NpcLoader().load("/content/npcs.json", testRooms());
 
         assertEquals(3, npcs.size());
         assertTrue(npcs.stream().anyMatch(npc -> npc.getId().equals("nadia")));
+    }
+
+    @Test
+    void placesNpcsInTheCorrespondingRoom() {
+        List<Npc> npcs = new NpcLoader().load("/content/npcs.json", testRooms());
+
+        Npc nadia = npcs.stream().filter(n -> n.getId().equals("nadia")).findFirst().orElseThrow();
+        assertEquals("sala", nadia.getCurrentRoom().getId());
     }
 
     @Test
@@ -41,7 +56,7 @@ class NpcLoaderTest {
         GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
 
         boolean fulfilled = request.tryFulfill(state);
-        assertFalse(fulfilled); // non ha ancora il peluche
+        assertFalse(fulfilled);
 
         state.addItem(peluche());
         fulfilled = request.tryFulfill(state);

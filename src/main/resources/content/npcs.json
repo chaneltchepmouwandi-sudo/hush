@@ -4,12 +4,14 @@
       "id": "elio",
       "name": "Elio",
       "description": "Un bambino silenzioso che scarabocchia sempre lo stesso disegno.",
+      "roomId": "sala",
       "request": null
     },
     {
       "id": "nadia",
       "name": "Nadia",
       "description": "Diffidente: nessuno le crede mai.",
+      "roomId": "sala",
       "request": {
         "id": "nadia-oggetto",
         "condition": { "type": "hasItem", "itemId": "peluche" },
@@ -24,6 +26,7 @@
       "id": "calla",
       "name": "Infermiera Calla",
       "description": "Gentile in modo quasi eccessivo.",
+      "roomId": "ufficio",
       "request": null
     }
   ]

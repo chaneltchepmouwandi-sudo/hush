@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129668;
 
+import it.unicam.cs.mpgc.rpg129668.content.level.Level;
 import it.unicam.cs.mpgc.rpg129668.content.level.LevelLoader;
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
@@ -16,7 +17,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Room startingRoom = new LevelLoader().load("/content/level1.json");
+        Level level = new LevelLoader().load("/content/level1.json");
+        Room startingRoom = level.startingRoom();
 
         GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(startingRoom));
         GameController controller = new GameController(state, List.of(),

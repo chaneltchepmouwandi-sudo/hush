@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,9 +23,9 @@ public class LevelLoader {
 
     /**
      * @param resourcePath percorso del file JSON nelle risorse (es. "/content/level1.json")
-     * @return la stanza di partenza del livello, con tutte le uscite già collegate
+     * @return la stanza di partenza e tutte le stanze del livello, indicizzate per id
      */
-    public Room load(String resourcePath) {
+    public Level load(String resourcePath) {
         LevelData data = readLevelData(resourcePath);
         Map<String, Room> roomsById = createRooms(data);
         linkExits(data, roomsById);
@@ -33,7 +34,7 @@ public class LevelLoader {
         if (startingRoom == null) {
             throw new IllegalStateException("Stanza di partenza non trovata: " + data.startingRoom);
         }
-        return startingRoom;
+        return new Level(startingRoom, Collections.unmodifiableMap(roomsById));
     }
 
     private LevelData readLevelData(String resourcePath) {

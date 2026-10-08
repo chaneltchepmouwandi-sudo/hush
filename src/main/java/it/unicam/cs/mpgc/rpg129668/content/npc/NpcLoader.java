@@ -3,6 +3,7 @@ package it.unicam.cs.mpgc.rpg129668.content.npc;
 import com.google.gson.Gson;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.*;
+import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Carica gli NPC (e le eventuali Request che offrono) da un file JSON.
@@ -18,18 +20,28 @@ public class NpcLoader {
 
     private final Gson gson = new Gson();
 
-    public List<Npc> load(String resourcePath) {
+    /**
+     * @param resourcePath percorso del file JSON nelle risorse
+     * @param roomsById stanze del livello, usate per posizionare ogni NPC nella sua roomId
+     * @return gli Npc del file, posizionati nella stanza corrispondente se roomId è valido
+     */
+    public List<Npc> load(String resourcePath, Map<String, Room> roomsById) {
         NpcListData data = readNpcListData(resourcePath);
         List<Npc> npcs = new ArrayList<>();
         for (NpcData npcData : data.npcs) {
-            npcs.add(new Npc(npcData.id, npcData.name, npcData.description));
+            Npc npc = new Npc(npcData.id, npcData.name, npcData.description);
+            Room room = roomsById.get(npcData.roomId);
+            if (room != null) {
+                npc.placeIn(room);
+            }
+            npcs.add(npc);
         }
         return npcs;
     }
 
     /**
      * Carica la Request associata a un NPC, se presente nel file.
-     * Separata da load() perché Request appartiene a GameController/UI,
+     * Separata da load() perché Request appartiene a core.model.interaction,
      * non a Npc stesso (vedi core.model.character.Npc).
      */
     public List<Request> loadRequests(String resourcePath) {

@@ -2,15 +2,13 @@ package it.unicam.cs.mpgc.rpg129668.content.level;
 
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LevelLoaderTest {
 
     @Test
     void loadsStartingRoomWithCorrectData() {
-        Room corridoio = new LevelLoader().load("/content/level1.json");
+        Room corridoio = new LevelLoader().load("/content/level1.json").startingRoom();
 
         assertEquals("corridoio", corridoio.getId());
         assertEquals("Corridoio", corridoio.getName());
@@ -18,7 +16,7 @@ class LevelLoaderTest {
 
     @Test
     void connectsExitsBetweenRooms() {
-        Room corridoio = new LevelLoader().load("/content/level1.json");
+        Room corridoio = new LevelLoader().load("/content/level1.json").startingRoom();
 
         Room sala = corridoio.getExit("nord").orElseThrow().destination();
         assertEquals("sala", sala.getId());
@@ -26,9 +24,17 @@ class LevelLoaderTest {
 
     @Test
     void lockedExitHasAClosedObstacle() {
-        Room corridoio = new LevelLoader().load("/content/level1.json");
+        Room corridoio = new LevelLoader().load("/content/level1.json").startingRoom();
 
         assertFalse(corridoio.getExit("est").orElseThrow().isPassable());
+    }
+
+    @Test
+    void exposesAllRoomsById() {
+        Level level = new LevelLoader().load("/content/level1.json");
+
+        assertEquals(3, level.roomsById().size());
+        assertTrue(level.roomsById().containsKey("ufficio"));
     }
 
     @Test
