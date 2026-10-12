@@ -7,6 +7,7 @@ import it.unicam.cs.mpgc.rpg129668.core.event.GameEventListener;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Guard;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Request;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 import it.unicam.cs.mpgc.rpg129668.core.rule.CapturePolicy;
 import it.unicam.cs.mpgc.rpg129668.core.rule.DetectionRule;
@@ -53,6 +54,13 @@ public class GameController {
                 .filter(npc -> npc.getCurrentRoom() != null)
                 .filter(npc -> npc.getCurrentRoom().equals(state.getPosition().getCurrentRoom()))
                 .toList();
+    }
+
+    /**
+     * @return gli oggetti ancora presenti nella stanza in cui si trova il giocatore
+     */
+    public List<Item> getItemsInCurrentRoom() {
+        return state.getItemsInRoom(state.getPosition().getCurrentRoom());
     }
 
     /**

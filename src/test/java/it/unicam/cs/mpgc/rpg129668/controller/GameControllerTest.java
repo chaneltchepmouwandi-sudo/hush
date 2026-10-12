@@ -12,6 +12,7 @@ import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import it.unicam.cs.mpgc.rpg129668.core.rule.ReturnToRoomCapturePolicy;
 import it.unicam.cs.mpgc.rpg129668.core.rule.SameRoomDetectionRule;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.GenericItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -71,5 +72,17 @@ class GameControllerTest {
 
         assertEquals(1, controller.getNpcsInCurrentRoom().size());
         assertEquals("elio", controller.getNpcsInCurrentRoom().get(0).getId());
+    }
+
+    @Test
+    void itemsInCurrentRoomAreReturnedByGetter() {
+        Room stanza = new Room("stanza", "Stanza", "...");
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
+        state.placeItem(stanza, new GenericItem("peluche", "Peluche", "..."));
+
+        GameController controller = new GameController(state, List.of(), List.of(), Map.of(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanza));
+
+        assertEquals(1, controller.getItemsInCurrentRoom().size());
     }
 }

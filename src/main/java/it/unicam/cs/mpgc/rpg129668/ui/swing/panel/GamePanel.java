@@ -1,24 +1,28 @@
 package it.unicam.cs.mpgc.rpg129668.ui.swing.panel;
 
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
+import it.unicam.cs.mpgc.rpg129668.core.action.PickUpAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TalkAction;
 import it.unicam.cs.mpgc.rpg129668.core.event.GameEvent;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Pannello di gioco: vista grafica della stanza (GameCanvas), elenco
- * degli NPC presenti con cui parlare, e un log testuale degli eventi.
+ * degli NPC presenti con cui parlare, elenco degli oggetti raccoglibili
+ * nella stanza, e un log testuale degli eventi.
  *
- * TODO: disegnare gli NPC anche su GameCanvas, non solo come pulsanti
+ * TODO: disegnare NPC e oggetti anche su GameCanvas, non solo come pulsanti
  */
 public class GamePanel extends JPanel {
 
     private final GameController controller;
     private final GameCanvas canvas;
-    private final JPanel npcPanel = new JPanel();
+    private final JPanel npcPanel = new JPanel(new FlowLayout());
+    private final JPanel itemPanel = new JPanel(new FlowLayout());
     private final JTextArea logArea = new JTextArea();
 
     public GamePanel(GameController controller) {
@@ -28,8 +32,11 @@ public class GamePanel extends JPanel {
         canvas = new GameCanvas(controller);
         add(canvas, BorderLayout.CENTER);
 
-        npcPanel.setLayout(new FlowLayout());
-        add(npcPanel, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(npcPanel);
+        topPanel.add(itemPanel);
+        add(topPanel, BorderLayout.NORTH);
 
         logArea.setEditable(false);
         logArea.setLineWrap(true);
@@ -39,12 +46,17 @@ public class GamePanel extends JPanel {
 
         controller.addListener(this::onGameEvent);
 
-        updateNpcPanel();
+        updateActionPanels();
     }
 
     private void onGameEvent(GameEvent event) {
         logArea.append(event.message() + "\n");
+        updateActionPanels();
+    }
+
+    private void updateActionPanels() {
         updateNpcPanel();
+        updateItemPanel();
     }
 
     private void updateNpcPanel() {
@@ -57,6 +69,17 @@ public class GamePanel extends JPanel {
         }
         npcPanel.revalidate();
         npcPanel.repaint();
+    }
+
+    private void updateItemPanel() {
+        itemPanel.removeAll();
+        for (Item item : controller.getItemsInCurrentRoom()) {
+            JButton button = new JButton("Raccogli " + item.getName());
+            button.addActionListener(e -> controller.performAction(new PickUpAction(item.getId())));
+            itemPanel.add(button);
+        }
+        itemPanel.revalidate();
+        itemPanel.repaint();
     }
 
     public void focusCanvas() {

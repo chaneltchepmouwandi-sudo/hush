@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "peluche",
+      "name": "Peluche",
+      "description": "Un peluche consumato dal tempo.",
+      "type": "generic",
+      "roomId": "sala"
+    },
+    {
+      "id": "chiave-ufficio",
+      "name": "Chiave dell'ufficio",
+      "description": "Una vecchia chiave di ottone.",
+      "type": "key",
+      "roomId": "corridoio",
+      "unlockCode": "chiave-ufficio"
+    }
+  ]
+}

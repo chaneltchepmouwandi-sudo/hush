@@ -7,7 +7,9 @@ import it.unicam.cs.mpgc.rpg129668.core.model.effect.StatModifier;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Key;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import org.junit.jupiter.api.Test;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,5 +93,34 @@ class GameStateTest {
         state.tick();
         assertEquals(5, state.getPlayer().getStats().getEffectiveValue(Stat.CARISMA));
         assertTrue(state.getActiveEffects().isEmpty());
+    }
+
+    @Test
+    void placedItemAppearsInRoom() {
+        GameState state = newState();
+        Room room = state.getPosition().getCurrentRoom();
+        state.placeItem(room, newKey());
+
+        assertEquals(1, state.getItemsInRoom(room).size());
+    }
+
+    @Test
+    void removingItemFromRoomTakesItOutOfTheRoom() {
+        GameState state = newState();
+        Room room = state.getPosition().getCurrentRoom();
+        state.placeItem(room, newKey());
+
+        Optional<Item> removed = state.removeItemFromRoom(room, "chiave-ufficio");
+
+        assertTrue(removed.isPresent());
+        assertTrue(state.getItemsInRoom(room).isEmpty());
+    }
+
+    @Test
+    void removingMissingItemFromRoomReturnsEmpty() {
+        GameState state = newState();
+        Room room = state.getPosition().getCurrentRoom();
+
+        assertTrue(state.removeItemFromRoom(room, "non-esiste").isEmpty());
     }
 }

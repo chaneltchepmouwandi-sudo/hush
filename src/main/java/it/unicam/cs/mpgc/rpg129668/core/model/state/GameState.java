@@ -4,6 +4,7 @@ import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
 import it.unicam.cs.mpgc.rpg129668.core.model.effect.Effect;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
+import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,14 +20,16 @@ import java.util.Set;
 
 /**
  * Lo stato dinamico di una partita: protagonista, posizione, inventario,
- * conoscenze sbloccate, fiducia verso gli NPC ed effetti attivi.
- * Non contiene la definizione del mondo (stanze, NPC), che è statica.
+ * oggetti ancora presenti nelle stanze, conoscenze sbloccate, fiducia
+ * verso gli NPC ed effetti attivi. Non contiene la definizione del
+ * mondo (stanze, NPC), che è statica.
  */
 public class GameState {
 
     private final Player player;
     private final Position position;
     private final Map<String, Item> inventory = new LinkedHashMap<>();
+    private final Map<String, List<Item>> itemsByRoomId = new HashMap<>();
     private final Set<String> unlockedKnowledge = new HashSet<>();
     private final Map<String, Integer> trust = new HashMap<>();
     private final List<Effect> activeEffects = new ArrayList<>();
@@ -62,6 +65,41 @@ public class GameState {
 
     public Collection<Item> getItems() {
         return Collections.unmodifiableCollection(inventory.values());
+    }
+
+    /**
+     * Posiziona un oggetto in una stanza, perché il giocatore possa
+     * raccoglierlo. Usato all'avvio della partita per i contenuti
+     * caricati da content.
+     */
+    public void placeItem(Room room, Item item) {
+        itemsByRoomId.computeIfAbsent(room.getId(), id -> new ArrayList<>()).add(item);
+    }
+
+    /**
+     * @return gli oggetti ancora presenti nella stanza (non ancora raccolti)
+     */
+    public List<Item> getItemsInRoom(Room room) {
+        return Collections.unmodifiableList(itemsByRoomId.getOrDefault(room.getId(), List.of()));
+    }
+
+    /**
+     * Toglie un oggetto da una stanza (es. quando viene raccolto).
+     */
+    public Optional<Item> removeItemFromRoom(Room room, String itemId) {
+        List<Item> items = itemsByRoomId.get(room.getId());
+        if (items == null) {
+            return Optional.empty();
+        }
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            if (item.getId().equals(itemId)) {
+                iterator.remove();
+                return Optional.of(item);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
