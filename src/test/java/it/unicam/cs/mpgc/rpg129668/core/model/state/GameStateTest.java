@@ -123,4 +123,15 @@ class GameStateTest {
 
         assertTrue(state.removeItemFromRoom(room, "non-esiste").isEmpty());
     }
+
+    @Test
+    void requestCompletionIsTrackedByGameState() {
+        GameState state = newState();
+
+        assertFalse(state.hasCompletedRequest("nadia-oggetto"));
+
+        state.markRequestCompleted("nadia-oggetto");
+
+        assertTrue(state.hasCompletedRequest("nadia-oggetto"));
+    }
 }

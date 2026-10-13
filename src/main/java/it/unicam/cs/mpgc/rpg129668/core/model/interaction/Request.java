@@ -6,37 +6,37 @@ import java.util.List;
 /**
  * Un favore richiesto da un NPC: se la condizione è soddisfatta, la
  * richiesta può essere completata una sola volta, applicando tutte
- * le ricompense allo stato di gioco.
+ * le ricompense allo stato di gioco. Request non ha stato proprio:
+ * se è stata completata o no si chiede a GameState, così tutto lo
+ * stato dinamico della partita resta in un unico posto.
  */
 public class Request {
 
     private final String id;
     private final Condition condition;
     private final List<Reward> rewards;
-    private boolean completed;
 
     public Request(String id, Condition condition, List<Reward> rewards) {
         this.id = id;
         this.condition = condition;
         this.rewards = rewards;
-        this.completed = false;
     }
 
     public String getId() {
         return id;
     }
 
-    public boolean isCompleted() {
-        return completed;
+    public boolean isCompleted(GameState state) {
+        return state.hasCompletedRequest(id);
     }
 
     public boolean canBeFulfilled(GameState state) {
-        return !completed && condition.isSatisfiedBy(state);
+        return !isCompleted(state) && condition.isSatisfiedBy(state);
     }
 
     /**
-     * Applica tutte le ricompense e segna la richiesta come completata.
-     * Non fa nulla se non può essere soddisfatta.
+     * Applica tutte le ricompense e segna la richiesta come completata
+     * in GameState. Non fa nulla se non può essere soddisfatta.
      *
      * @return true se le ricompense sono state applicate
      */
@@ -45,7 +45,7 @@ public class Request {
             return false;
         }
         rewards.forEach(reward -> reward.grantTo(state));
-        completed = true;
+        state.markRequestCompleted(id);
         return true;
     }
 }

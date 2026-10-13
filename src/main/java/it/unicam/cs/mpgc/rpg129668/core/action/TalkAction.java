@@ -27,7 +27,7 @@ public class TalkAction implements GameAction {
         if (request == null) {
             return npc.getName() + ": " + npc.getDescription();
         }
-        if (request.isCompleted()) {
+        if (request.isCompleted(state)) {
             return npc.getName() + ": Non ho altro da dirti.";
         }
         if (request.tryFulfill(state)) {

@@ -21,8 +21,8 @@ import java.util.Set;
 /**
  * Lo stato dinamico di una partita: protagonista, posizione, inventario,
  * oggetti ancora presenti nelle stanze, conoscenze sbloccate, fiducia
- * verso gli NPC ed effetti attivi. Non contiene la definizione del
- * mondo (stanze, NPC), che è statica.
+ * verso gli NPC, effetti attivi e richieste già completate. Non
+ * contiene la definizione del mondo (stanze, NPC), che è statica.
  */
 public class GameState {
 
@@ -33,6 +33,7 @@ public class GameState {
     private final Set<String> unlockedKnowledge = new HashSet<>();
     private final Map<String, Integer> trust = new HashMap<>();
     private final List<Effect> activeEffects = new ArrayList<>();
+    private final Set<String> completedRequestIds = new HashSet<>();
 
     public GameState(Player player, Position position) {
         this.player = player;
@@ -158,5 +159,17 @@ public class GameState {
                 iterator.remove();
             }
         }
+    }
+
+    /**
+     * Segna una Request come completata. Chiamato da Request.tryFulfill,
+     * non direttamente altrove.
+     */
+    public void markRequestCompleted(String requestId) {
+        completedRequestIds.add(requestId);
+    }
+
+    public boolean hasCompletedRequest(String requestId) {
+        return completedRequestIds.contains(requestId);
     }
 }
