@@ -1,5 +1,6 @@
 package it.unicam.cs.mpgc.rpg129668;
 
+import it.unicam.cs.mpgc.rpg129668.content.item.ItemContent;
 import it.unicam.cs.mpgc.rpg129668.content.item.ItemLoader;
 import it.unicam.cs.mpgc.rpg129668.content.level.Level;
 import it.unicam.cs.mpgc.rpg129668.content.level.LevelLoader;
@@ -8,39 +9,59 @@ import it.unicam.cs.mpgc.rpg129668.content.npc.NpcLoader;
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
-import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import it.unicam.cs.mpgc.rpg129668.core.rule.ReturnToRoomCapturePolicy;
 import it.unicam.cs.mpgc.rpg129668.core.rule.SameRoomDetectionRule;
+import it.unicam.cs.mpgc.rpg129668.persistence.GameSnapshot;
+import it.unicam.cs.mpgc.rpg129668.persistence.GameStateMapper;
+import it.unicam.cs.mpgc.rpg129668.persistence.JsonSaveRepository;
+import it.unicam.cs.mpgc.rpg129668.persistence.SaveRepository;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.GameWindow;
 
 import javax.swing.SwingUtilities;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Main {
     public static void main(String[] args) {
         Level level = new LevelLoader().load("/content/level1.json");
         NpcContent npcContent = new NpcLoader().load("/content/npcs.json", level.roomsById());
+        ItemContent itemContent = new ItemLoader().load("/content/items.json");
 
-        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(level.startingRoom()));
-        placeItems(state, level);
+        SaveRepository saveRepository = new JsonSaveRepository(Path.of("hush-save.json"));
+        GameStateMapper mapper = new GameStateMapper();
 
-        GameController controller = new GameController(state, List.of(), npcContent.npcs(), npcContent.requestsByNpcId(),
-                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(level.startingRoom()));
+        Supplier<GameController> newGame = () -> buildController(level, npcContent, newGameState(level, itemContent));
+        Supplier<GameController> loadGame = () -> {
+            GameSnapshot snapshot = saveRepository.load();
+            GameState state = mapper.fromSnapshot(snapshot, level.roomsById(), itemContent.itemsById());
+            return buildController(level, npcContent, state);
+        };
+        Consumer<GameController> onSave = controller -> saveRepository.save(mapper.toSnapshot(controller.getState()));
 
-        SwingUtilities.invokeLater(() -> new GameWindow(controller).setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            GameWindow window = new GameWindow(newGame, loadGame, saveRepository.hasSave(), onSave);
+            window.setVisible(true);
+        });
     }
 
-    private static void placeItems(GameState state, Level level) {
-        Map<String, List<Item>> itemsByRoomId = new ItemLoader().load("/content/items.json");
-        for (Map.Entry<String, List<Item>> entry : itemsByRoomId.entrySet()) {
-            Room room = level.roomsById().get(entry.getKey());
+    private static GameState newGameState(Level level, ItemContent itemContent) {
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(level.startingRoom()));
+        itemContent.itemsByRoomId().forEach((roomId, items) -> {
+            Room room = level.roomsById().get(roomId);
             if (room != null) {
-                entry.getValue().forEach(item -> state.placeItem(room, item));
+                items.forEach(item -> state.placeItem(room, item));
             }
-        }
+        });
+        return state;
+    }
+
+    private static GameController buildController(Level level, NpcContent npcContent, GameState state) {
+        return new GameController(state, List.of(), npcContent.npcs(), npcContent.requestsByNpcId(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(level.startingRoom()));
     }
 }

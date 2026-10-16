@@ -13,7 +13,7 @@ import java.awt.*;
 /**
  * Pannello di gioco: vista grafica della stanza (GameCanvas), elenco
  * degli NPC presenti con cui parlare, elenco degli oggetti raccoglibili
- * nella stanza, e un log testuale degli eventi.
+ * nella stanza, un pulsante per salvare, e un log testuale degli eventi.
  *
  * TODO: disegnare NPC e oggetti anche su GameCanvas, non solo come pulsanti
  */
@@ -25,7 +25,7 @@ public class GamePanel extends JPanel {
     private final JPanel itemPanel = new JPanel(new FlowLayout());
     private final JTextArea logArea = new JTextArea();
 
-    public GamePanel(GameController controller) {
+    public GamePanel(GameController controller, Runnable onSave) {
         this.controller = controller;
         setLayout(new BorderLayout());
 
@@ -38,11 +38,20 @@ public class GamePanel extends JPanel {
         topPanel.add(itemPanel);
         add(topPanel, BorderLayout.NORTH);
 
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         logArea.setEditable(false);
         logArea.setLineWrap(true);
         logArea.setWrapStyleWord(true);
         logArea.setRows(4);
-        add(new JScrollPane(logArea), BorderLayout.SOUTH);
+        bottomPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
+
+        JButton saveButton = new JButton("Salva partita");
+        saveButton.addActionListener(e -> {
+            onSave.run();
+            logArea.append("Partita salvata.\n");
+        });
+        bottomPanel.add(saveButton, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
 
         controller.addListener(this::onGameEvent);
 

@@ -104,6 +104,16 @@ public class GameState {
     }
 
     /**
+     * @return tutti gli oggetti ancora nelle stanze, indicizzati per id
+     *         della stanza. Usato da persistence per salvare la partita.
+     */
+    public Map<String, List<Item>> getRoomItemsSnapshot() {
+        Map<String, List<Item>> copy = new HashMap<>();
+        itemsByRoomId.forEach((roomId, items) -> copy.put(roomId, List.copyOf(items)));
+        return Collections.unmodifiableMap(copy);
+    }
+
+    /**
      * Registra una conoscenza. Un id null viene ignorato, perché un
      * Readable atmosferico può non sbloccare nulla.
      */
@@ -130,6 +140,14 @@ public class GameState {
 
     public void changeTrust(String npcId, int delta) {
         trust.merge(npcId, delta, Integer::sum);
+    }
+
+    /**
+     * @return la fiducia verso ogni NPC mai modificata. Usato da
+     *         persistence per salvare la partita.
+     */
+    public Map<String, Integer> getAllTrust() {
+        return Collections.unmodifiableMap(trust);
     }
 
     /**
@@ -171,5 +189,13 @@ public class GameState {
 
     public boolean hasCompletedRequest(String requestId) {
         return completedRequestIds.contains(requestId);
+    }
+
+    /**
+     * @return gli id di tutte le richieste completate. Usato da
+     *         persistence per salvare la partita.
+     */
+    public Set<String> getCompletedRequestIds() {
+        return Collections.unmodifiableSet(completedRequestIds);
     }
 }

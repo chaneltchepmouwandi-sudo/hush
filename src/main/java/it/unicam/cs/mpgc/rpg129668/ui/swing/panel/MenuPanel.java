@@ -6,12 +6,11 @@ import java.awt.*;
 /**
  * Menu principale, mostrato dopo la schermata del titolo.
  *
- * TODO: abilitare "Carica partita" quando persistence sarà pronto
  * TODO: abilitare "Guida" quando sarà scritto il testo della guida
  */
 public class MenuPanel extends JPanel {
 
-    public MenuPanel(Runnable onNewGame, Runnable onExit) {
+    public MenuPanel(Runnable onNewGame, Runnable onLoadGame, boolean loadAvailable, Runnable onExit) {
         setLayout(new GridBagLayout());
         setBackground(Color.BLACK);
 
@@ -21,7 +20,9 @@ public class MenuPanel extends JPanel {
 
         content.add(createEnabledButton("Nuova partita", onNewGame));
         content.add(Box.createVerticalStrut(10));
-        content.add(createDisabledButton("Carica partita"));
+        content.add(loadAvailable
+                ? createEnabledButton("Carica partita", onLoadGame)
+                : createDisabledButton("Carica partita"));
         content.add(Box.createVerticalStrut(10));
         content.add(createDisabledButton("Guida"));
         content.add(Box.createVerticalStrut(10));

@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * Carica gli oggetti raccoglibili da un file JSON, raggruppati per
- * id della stanza in cui si trovano.
+ * stanza e indicizzati per id.
  *
  * TODO: supportare anche "pill" e "document" quando servirà
  *       posizionarne nel mondo (per ora costruiti a mano nei test)
@@ -25,16 +25,18 @@ public class ItemLoader {
 
     private final Gson gson = new Gson();
 
-    public Map<String, List<Item>> load(String resourcePath) {
+    public ItemContent load(String resourcePath) {
         ItemListData data = readItemListData(resourcePath);
         Map<String, List<Item>> itemsByRoomId = new HashMap<>();
+        Map<String, Item> itemsById = new HashMap<>();
 
         for (ItemData itemData : data.items) {
             Item item = createItem(itemData);
             itemsByRoomId.computeIfAbsent(itemData.roomId, id -> new ArrayList<>()).add(item);
+            itemsById.put(item.getId(), item);
         }
 
-        return itemsByRoomId;
+        return new ItemContent(itemsByRoomId, itemsById);
     }
 
     private ItemListData readItemListData(String resourcePath) {
