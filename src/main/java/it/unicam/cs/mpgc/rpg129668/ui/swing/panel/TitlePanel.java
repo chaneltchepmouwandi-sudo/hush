@@ -1,5 +1,7 @@
 package it.unicam.cs.mpgc.rpg129668.ui.swing.panel;
 
+import it.unicam.cs.mpgc.rpg129668.ui.swing.UiTheme;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -16,16 +18,16 @@ public class TitlePanel extends JPanel {
 
     public TitlePanel(Runnable onContinue) {
         setLayout(new GridBagLayout());
-        setBackground(Color.BLACK);
+        setBackground(UiTheme.BACKGROUND);
         setFocusable(true);
 
         JLabel title = new JLabel("HUSH");
-        title.setForeground(Color.WHITE);
+        title.setForeground(UiTheme.ACCENT);
         title.setFont(title.getFont().deriveFont(Font.BOLD, 64f));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel hint = new JLabel("Premi un tasto per continuare");
-        hint.setForeground(Color.LIGHT_GRAY);
+        hint.setForeground(UiTheme.TEXT_SECONDARY);
         hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 14f));
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);
 
