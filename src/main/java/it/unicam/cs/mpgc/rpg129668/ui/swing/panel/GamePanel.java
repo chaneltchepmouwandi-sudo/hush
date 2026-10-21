@@ -4,6 +4,7 @@ import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.action.PickUpAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TalkAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TryUnlockAction;
+import it.unicam.cs.mpgc.rpg129668.core.event.EventType;
 import it.unicam.cs.mpgc.rpg129668.core.event.GameEvent;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
@@ -15,10 +16,11 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Pannello di gioco: vista grafica della stanza (GameCanvas), elenco
- * degli NPC presenti con cui parlare, elenco degli oggetti raccoglibili
- * nella stanza, pulsanti per aprire i passaggi bloccati, un pulsante
- * per salvare, e un log testuale degli eventi.
+ * Pannello di gioco: vista grafica della stanza (GameCanvas), pannello
+ * di stato laterale (StatusPanel), elenco degli NPC presenti con cui
+ * parlare, elenco degli oggetti raccoglibili nella stanza, pulsanti
+ * per aprire i passaggi bloccati, un pulsante per salvare, e un log
+ * testuale degli eventi.
  */
 public class GamePanel extends JPanel {
 
@@ -38,6 +40,7 @@ public class GamePanel extends JPanel {
 
         canvas = new GameCanvas(controller);
         add(canvas, BorderLayout.CENTER);
+        add(new StatusPanel(controller), BorderLayout.EAST);
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -78,7 +81,9 @@ public class GamePanel extends JPanel {
     }
 
     private void onGameEvent(GameEvent event) {
-        logArea.append(event.message() + "\n");
+        if (event.type() != EventType.TURN_ENDED) {
+            logArea.append(event.message() + "\n");
+        }
         updateActionPanels();
     }
 

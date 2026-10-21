@@ -41,7 +41,7 @@ public class GameWindow extends JFrame {
         this.onSaveRequested = onSaveRequested;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 650);
+        setSize(1000, 650);
         setLocationRelativeTo(null);
 
         titlePanel = new TitlePanel(this::showMenu);

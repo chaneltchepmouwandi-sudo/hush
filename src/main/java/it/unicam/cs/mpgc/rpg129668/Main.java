@@ -8,6 +8,7 @@ import it.unicam.cs.mpgc.rpg129668.content.npc.NpcContent;
 import it.unicam.cs.mpgc.rpg129668.content.npc.NpcLoader;
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
@@ -50,7 +51,7 @@ public class Main {
     }
 
     private static GameState newGameState(Level level, ItemContent itemContent) {
-        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(level.startingRoom()));
+        GameState state = new GameState(new Player("Protagonista", initialStats()), new Position(level.startingRoom()));
         itemContent.itemsByRoomId().forEach((roomId, items) -> {
             Room room = level.roomsById().get(roomId);
             if (room != null) {
@@ -58,6 +59,20 @@ public class Main {
             }
         });
         return state;
+    }
+
+    /**
+     * Statistiche iniziali della protagonista.
+     *
+     * TODO: spostare i valori iniziali in un file JSON insieme al resto dei contenuti
+     */
+    private static StatBlock initialStats() {
+        StatBlock stats = new StatBlock();
+        stats.setBase(Stat.CARISMA, 2);
+        stats.setBase(Stat.FORZA, 1);
+        stats.setBase(Stat.PERCEZIONE, 3);
+        stats.setBase(Stat.AGILITA, 3);
+        return stats;
     }
 
     private static GameController buildController(Level level, NpcContent npcContent, GameState state) {

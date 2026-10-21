@@ -47,6 +47,13 @@ public class GameController {
     }
 
     /**
+     * @return tutti gli Npc del livello, ovunque si trovino
+     */
+    public List<Npc> getNpcs() {
+        return List.copyOf(npcs);
+    }
+
+    /**
      * @return gli Npc posizionati nella stanza in cui si trova attualmente il giocatore
      */
     public List<Npc> getNpcsInCurrentRoom() {
@@ -76,12 +83,16 @@ public class GameController {
 
     /**
      * Esegue l'azione del giocatore, notifica il risultato, poi fa
-     * avanzare il turno (effetti, guardie, controllo di cattura).
+     * avanzare il turno (effetti, guardie, controllo di cattura) e ne
+     * notifica la fine: chi mostra lo stato (es. il pannello di stato)
+     * si aggiorna così anche dopo la scadenza degli effetti, che
+     * avviene dopo la notifica del risultato.
      */
     public void performAction(GameAction action) {
         String result = action.execute(state);
         notify(new GameEvent(EventType.TURN_RESULT, result));
         advanceTurn();
+        notify(new GameEvent(EventType.TURN_ENDED, ""));
     }
 
     private void advanceTurn() {

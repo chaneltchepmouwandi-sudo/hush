@@ -6,13 +6,15 @@ import it.unicam.cs.mpgc.rpg129668.core.model.character.Guard;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.PatrolBehavior;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
+import it.unicam.cs.mpgc.rpg129668.core.model.effect.StatModifier;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.GenericItem;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import it.unicam.cs.mpgc.rpg129668.core.rule.ReturnToRoomCapturePolicy;
 import it.unicam.cs.mpgc.rpg129668.core.rule.SameRoomDetectionRule;
-import it.unicam.cs.mpgc.rpg129668.core.model.item.GenericItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -36,9 +38,44 @@ class GameControllerTest {
 
         controller.performAction(s -> "Messaggio di prova");
 
-        assertEquals(1, events.size());
         assertEquals(EventType.TURN_RESULT, events.get(0).type());
         assertEquals("Messaggio di prova", events.get(0).message());
+    }
+
+    @Test
+    void turnEndedIsTheLastEventOfATurn() {
+        Room stanza = new Room("stanza", "Stanza", "...");
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
+        GameController controller = new GameController(state, List.of(), List.of(), Map.of(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanza));
+
+        List<GameEvent> events = new ArrayList<>();
+        controller.addListener(events::add);
+
+        controller.performAction(s -> "Ti muovi.");
+
+        assertEquals(EventType.TURN_ENDED, events.get(events.size() - 1).type());
+    }
+
+    @Test
+    void expiredEffectsAreAlreadyRemovedWhenTurnEnds() {
+        Room stanza = new Room("stanza", "Stanza", "...");
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
+        state.getPlayer().getStats().setBase(Stat.CARISMA, 5);
+        state.addEffect(new StatModifier(Stat.CARISMA, 3, 1));
+        GameController controller = new GameController(state, List.of(), List.of(), Map.of(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanza));
+
+        List<Integer> carismaAtTurnEnd = new ArrayList<>();
+        controller.addListener(event -> {
+            if (event.type() == EventType.TURN_ENDED) {
+                carismaAtTurnEnd.add(state.getPlayer().getStats().getEffectiveValue(Stat.CARISMA));
+            }
+        });
+
+        controller.performAction(s -> "Passa un turno.");
+
+        assertEquals(List.of(5), carismaAtTurnEnd); // il bonus +3 è già scaduto
     }
 
     @Test
@@ -72,6 +109,21 @@ class GameControllerTest {
 
         assertEquals(1, controller.getNpcsInCurrentRoom().size());
         assertEquals("elio", controller.getNpcsInCurrentRoom().get(0).getId());
+    }
+
+    @Test
+    void allNpcsAreReturnedRegardlessOfRoom() {
+        Room stanzaA = new Room("a", "Stanza A", "...");
+        Room stanzaB = new Room("b", "Stanza B", "...");
+        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanzaA));
+        Npc elio = new Npc("elio", "Elio", "...");
+        elio.placeIn(stanzaB);
+
+        GameController controller = new GameController(state, List.of(), List.of(elio), Map.of(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(stanzaA));
+
+        assertEquals(1, controller.getNpcs().size());
+        assertTrue(controller.getNpcsInCurrentRoom().isEmpty());
     }
 
     @Test
