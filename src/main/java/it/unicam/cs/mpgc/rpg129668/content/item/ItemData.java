@@ -7,4 +7,5 @@ public class ItemData {
     public String type;
     public String roomId;
     public String unlockCode;
+    public EffectData effect;
 }

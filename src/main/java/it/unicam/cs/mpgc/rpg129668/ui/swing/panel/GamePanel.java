@@ -4,10 +4,12 @@ import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.core.action.PickUpAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TalkAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TryUnlockAction;
+import it.unicam.cs.mpgc.rpg129668.core.action.UsePillAction;
 import it.unicam.cs.mpgc.rpg129668.core.event.EventType;
 import it.unicam.cs.mpgc.rpg129668.core.event.GameEvent;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Pill;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.UiTheme;
 
@@ -19,8 +21,8 @@ import java.util.List;
  * Pannello di gioco: vista grafica della stanza (GameCanvas), pannello
  * di stato laterale (StatusPanel), elenco degli NPC presenti con cui
  * parlare, elenco degli oggetti raccoglibili nella stanza, pulsanti
- * per aprire i passaggi bloccati, un pulsante per salvare, e un log
- * testuale degli eventi.
+ * per aprire i passaggi bloccati e per usare le pillole in
+ * inventario, un pulsante per salvare, e un log testuale degli eventi.
  */
 public class GamePanel extends JPanel {
 
@@ -31,6 +33,7 @@ public class GamePanel extends JPanel {
     private final JPanel npcPanel = new JPanel(new FlowLayout());
     private final JPanel itemPanel = new JPanel(new FlowLayout());
     private final JPanel openPanel = new JPanel(new FlowLayout());
+    private final JPanel usePanel = new JPanel(new FlowLayout());
     private final JTextArea logArea = new JTextArea();
 
     public GamePanel(GameController controller, Runnable onSave) {
@@ -48,9 +51,11 @@ public class GamePanel extends JPanel {
         npcPanel.setBackground(UiTheme.BACKGROUND);
         itemPanel.setBackground(UiTheme.BACKGROUND);
         openPanel.setBackground(UiTheme.BACKGROUND);
+        usePanel.setBackground(UiTheme.BACKGROUND);
         topPanel.add(npcPanel);
         topPanel.add(itemPanel);
         topPanel.add(openPanel);
+        topPanel.add(usePanel);
         add(topPanel, BorderLayout.NORTH);
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -91,6 +96,7 @@ public class GamePanel extends JPanel {
         updateNpcPanel();
         updateItemPanel();
         updateOpenPanel();
+        updateUsePanel();
     }
 
     private void updateNpcPanel() {
@@ -133,6 +139,20 @@ public class GamePanel extends JPanel {
         }
         openPanel.revalidate();
         openPanel.repaint();
+    }
+
+    private void updateUsePanel() {
+        usePanel.removeAll();
+        for (Item item : controller.getState().getItems()) {
+            if (item instanceof Pill) {
+                JButton button = new JButton("Usa " + item.getName());
+                button.addActionListener(e -> controller.performAction(new UsePillAction(item.getId())));
+                UiTheme.styleButton(button);
+                usePanel.add(button);
+            }
+        }
+        usePanel.revalidate();
+        usePanel.repaint();
     }
 
     public void focusCanvas() {

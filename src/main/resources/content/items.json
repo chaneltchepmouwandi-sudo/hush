@@ -14,6 +14,29 @@
       "type": "key",
       "roomId": "corridoio",
       "unlockCode": "chiave-ufficio"
+    },
+    {
+      "id": "pillola-azzurra",
+      "name": "Pillola azzurra",
+      "description": "Una pillola azzurra: ti senti più sicura di te.",
+      "type": "pill",
+      "roomId": "sala",
+      "effect": { "type": "statModifier", "stat": "CARISMA", "amount": 2, "duration": 6 }
+    },
+    {
+      "id": "pillola-grigia",
+      "name": "Pillola grigia",
+      "description": "Una pillola grigia, senza etichetta.",
+      "type": "pill",
+      "roomId": "ufficio",
+      "effect": {
+        "type": "confusion",
+        "duration": 5,
+        "penalties": [
+          { "stat": "PERCEZIONE", "amount": 2 },
+          { "stat": "AGILITA", "amount": 1 }
+        ]
+      }
     }
   ]
 }
