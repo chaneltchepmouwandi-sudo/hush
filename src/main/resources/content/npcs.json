@@ -19,7 +19,12 @@
           { "type": "takeItem", "itemId": "peluche" },
           { "type": "trust", "npcId": "nadia", "amount": 2 },
           { "type": "knowledge", "knowledgeId": "sa-infermiera-ala-nord" }
-        ]
+        ],
+        "lines": {
+          "pending": "Non mi fido di te. Portami quel peluche e ti dirò cosa ho visto.",
+          "fulfilled": "Va bene. Quella notte ho visto un'infermiera uscire dall'ala nord. Non sono sicura fosse proprio quella notte, però.",
+          "completed": "Ti ho già detto tutto quello che so."
+        }
       }
     },
     {
@@ -27,7 +32,19 @@
       "name": "Infermiera Calla",
       "description": "Gentile in modo quasi eccessivo.",
       "roomId": "ufficio",
-      "request": null
+      "request": {
+        "id": "calla-fiducia",
+        "condition": { "type": "statAtLeast", "stat": "CARISMA", "minimum": 3 },
+        "rewards": [
+          { "type": "trust", "npcId": "calla", "amount": 1 },
+          { "type": "knowledge", "knowledgeId": "sa-calla-ha-accompagnato-il-fratello" }
+        ],
+        "lines": {
+          "pending": "Sei ancora troppo timida per fare certe domande, tesoro. Torna quando ti sentirai più sicura.",
+          "fulfilled": "Va bene, va bene... Quella notte l'ho accompagnato io. Ma non posso dirti altro.",
+          "completed": "Non c'è altro da dire, tesoro. Ora vai a riposare."
+        }
+      }
     }
   ]
 }

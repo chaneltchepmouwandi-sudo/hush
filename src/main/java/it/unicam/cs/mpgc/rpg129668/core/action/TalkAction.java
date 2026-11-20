@@ -1,11 +1,13 @@
 package it.unicam.cs.mpgc.rpg129668.core.action;
 
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
+import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Dialogue;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Request;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 
 /**
- * Parla con un NPC, tentando di soddisfare una sua Request se presente.
+ * Parla con un NPC, tentando di soddisfare una sua Request se presente
+ * e rispondendo con le battute definite nella Request stessa.
  * Se l'NPC non ha nessuna Request, mostra semplicemente la sua descrizione.
  */
 public class TalkAction implements GameAction {
@@ -27,12 +29,13 @@ public class TalkAction implements GameAction {
         if (request == null) {
             return npc.getName() + ": " + npc.getDescription();
         }
+        Dialogue dialogue = request.getDialogue();
         if (request.isCompleted(state)) {
-            return npc.getName() + ": Non ho altro da dirti.";
+            return npc.getName() + ": " + dialogue.whenCompleted();
         }
         if (request.tryFulfill(state)) {
-            return npc.getName() + ": Grazie per avermelo portato. Ora posso dirti qualcosa.";
+            return npc.getName() + ": " + dialogue.whenFulfilled();
         }
-        return npc.getName() + ": Torna quando avrai quello che ti ho chiesto.";
+        return npc.getName() + ": " + dialogue.whenPending();
     }
 }

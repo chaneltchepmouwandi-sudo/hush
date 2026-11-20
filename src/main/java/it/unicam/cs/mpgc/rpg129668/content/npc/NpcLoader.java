@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg129668.content.npc;
 
 import com.google.gson.Gson;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.*;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 
@@ -63,12 +64,27 @@ public class NpcLoader {
     private Request createRequest(RequestData data) {
         Condition condition = createCondition(data.condition);
         List<Reward> rewards = data.rewards.stream().map(this::createReward).toList();
-        return new Request(data.id, condition, rewards);
+        return new Request(data.id, condition, rewards, createDialogue(data.lines));
+    }
+
+    private Dialogue createDialogue(DialogueData lines) {
+        if (lines == null) {
+            return Dialogue.DEFAULT;
+        }
+        return new Dialogue(
+                orDefault(lines.pending, Dialogue.DEFAULT.whenPending()),
+                orDefault(lines.fulfilled, Dialogue.DEFAULT.whenFulfilled()),
+                orDefault(lines.completed, Dialogue.DEFAULT.whenCompleted()));
+    }
+
+    private String orDefault(String value, String fallback) {
+        return value != null ? value : fallback;
     }
 
     private Condition createCondition(ConditionData data) {
         return switch (data.type) {
             case "hasItem" -> new HasItemCondition(data.itemId);
+            case "statAtLeast" -> new StatCondition(Stat.valueOf(data.stat), data.minimum);
             default -> throw new IllegalArgumentException("Tipo di condizione sconosciuto: " + data.type);
         };
     }

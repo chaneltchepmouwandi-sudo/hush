@@ -2,7 +2,9 @@ package it.unicam.cs.mpgc.rpg129668.content.npc;
 
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
+import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
+import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Dialogue;
 import it.unicam.cs.mpgc.rpg129668.core.model.interaction.Request;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
@@ -21,6 +23,11 @@ class NpcLoaderTest {
                 "sala", new Room("sala", "Sala comune", "..."),
                 "ufficio", new Room("ufficio", "Ufficio", "...")
         );
+    }
+
+    private GameState newState() {
+        Room stanza = new Room("stanza", "Stanza", "...");
+        return new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
     }
 
     @Test
@@ -44,6 +51,7 @@ class NpcLoaderTest {
         NpcContent content = new NpcLoader().load("/content/npcs.json", testRooms());
 
         assertTrue(content.requestsByNpcId().containsKey("nadia"));
+        assertTrue(content.requestsByNpcId().containsKey("calla"));
         assertFalse(content.requestsByNpcId().containsKey("elio"));
     }
 
@@ -52,8 +60,7 @@ class NpcLoaderTest {
         NpcContent content = new NpcLoader().load("/content/npcs.json", testRooms());
         Request request = content.requestsByNpcId().get("nadia");
 
-        Room stanza = new Room("stanza", "Stanza", "...");
-        GameState state = new GameState(new Player("Protagonista", new StatBlock()), new Position(stanza));
+        GameState state = newState();
 
         assertFalse(request.tryFulfill(state));
 
@@ -61,6 +68,28 @@ class NpcLoaderTest {
         assertTrue(request.tryFulfill(state));
         assertEquals(2, state.getTrust("nadia"));
         assertTrue(state.hasKnowledge("sa-infermiera-ala-nord"));
+    }
+
+    @Test
+    void callaRequestNeedsEnoughCharisma() {
+        NpcContent content = new NpcLoader().load("/content/npcs.json", testRooms());
+        Request request = content.requestsByNpcId().get("calla");
+
+        GameState state = newState();
+        state.getPlayer().getStats().setBase(Stat.CARISMA, 2);
+        assertFalse(request.canBeFulfilled(state));
+
+        state.getPlayer().getStats().setBase(Stat.CARISMA, 3);
+        assertTrue(request.canBeFulfilled(state));
+    }
+
+    @Test
+    void loadedRequestUsesItsOwnDialogueLines() {
+        NpcContent content = new NpcLoader().load("/content/npcs.json", testRooms());
+
+        Dialogue lines = content.requestsByNpcId().get("calla").getDialogue();
+
+        assertNotEquals(Dialogue.DEFAULT, lines);
     }
 
     private Item peluche() {

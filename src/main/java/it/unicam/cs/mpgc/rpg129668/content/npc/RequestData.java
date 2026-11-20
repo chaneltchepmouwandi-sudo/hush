@@ -6,4 +6,5 @@ public class RequestData {
     public String id;
     public ConditionData condition;
     public List<RewardData> rewards;
+    public DialogueData lines;
 }
