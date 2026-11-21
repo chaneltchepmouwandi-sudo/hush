@@ -2,6 +2,7 @@ package it.unicam.cs.mpgc.rpg129668.ui.swing;
 
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.panel.GamePanel;
+import it.unicam.cs.mpgc.rpg129668.ui.swing.panel.GuidePanel;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.panel.MenuPanel;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.panel.TitlePanel;
 
@@ -13,15 +14,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Finestra principale: schermata iniziale, menu, e pannello di gioco,
- * mostrati uno alla volta tramite CardLayout. La partita (GameController)
- * viene costruita solo quando il giocatore sceglie "Nuova partita" o
- * "Carica partita", non prima.
+ * Finestra principale: schermata iniziale, menu, guida e pannello di
+ * gioco, mostrati uno alla volta tramite CardLayout. La partita
+ * (GameController) viene costruita solo quando il giocatore sceglie
+ * "Nuova partita" o "Carica partita", non prima.
  */
 public class GameWindow extends JFrame {
 
     private static final String TITLE_CARD = "title";
     private static final String MENU_CARD = "menu";
+    private static final String GUIDE_CARD = "guide";
     private static final String GAME_CARD = "game";
 
     private final CardLayout cardLayout = new CardLayout();
@@ -45,10 +47,13 @@ public class GameWindow extends JFrame {
         setLocationRelativeTo(null);
 
         titlePanel = new TitlePanel(this::showMenu);
-        MenuPanel menuPanel = new MenuPanel(this::startNewGame, this::continueGame, saveAvailable, () -> System.exit(0));
+        MenuPanel menuPanel = new MenuPanel(this::startNewGame, this::continueGame, saveAvailable,
+                this::showGuide, () -> System.exit(0));
+        GuidePanel guidePanel = new GuidePanel(this::showMenu);
 
         cards.add(titlePanel, TITLE_CARD);
         cards.add(menuPanel, MENU_CARD);
+        cards.add(guidePanel, GUIDE_CARD);
         add(cards);
 
         addWindowFocusListener(new WindowAdapter() {
@@ -73,6 +78,10 @@ public class GameWindow extends JFrame {
 
     private void showMenu() {
         cardLayout.show(cards, MENU_CARD);
+    }
+
+    private void showGuide() {
+        cardLayout.show(cards, GUIDE_CARD);
     }
 
     private void startNewGame() {

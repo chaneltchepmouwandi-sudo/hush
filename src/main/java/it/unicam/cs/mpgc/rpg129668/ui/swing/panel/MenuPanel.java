@@ -6,13 +6,14 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Menu principale, mostrato dopo la schermata del titolo.
- *
- * TODO: abilitare "Guida" quando sarà scritto il testo della guida
+ * Menu principale, mostrato dopo la schermata del titolo: nuova
+ * partita, carica partita (disponibile solo se esiste un salvataggio),
+ * guida ed esci.
  */
 public class MenuPanel extends JPanel {
 
-    public MenuPanel(Runnable onNewGame, Runnable onLoadGame, boolean loadAvailable, Runnable onExit) {
+    public MenuPanel(Runnable onNewGame, Runnable onLoadGame, boolean loadAvailable,
+                     Runnable onGuide, Runnable onExit) {
         setLayout(new GridBagLayout());
         setBackground(UiTheme.BACKGROUND);
 
@@ -24,9 +25,9 @@ public class MenuPanel extends JPanel {
         content.add(Box.createVerticalStrut(14));
         content.add(loadAvailable
                 ? createEnabledButton("Carica partita", onLoadGame)
-                : createDisabledButton("Carica partita"));
+                : createDisabledButton("Carica partita", "Nessuna partita salvata"));
         content.add(Box.createVerticalStrut(14));
-        content.add(createDisabledButton("Guida"));
+        content.add(createEnabledButton("Guida", onGuide));
         content.add(Box.createVerticalStrut(14));
         content.add(createEnabledButton("Esci", onExit));
 
@@ -41,11 +42,11 @@ public class MenuPanel extends JPanel {
         return button;
     }
 
-    private JButton createDisabledButton(String label) {
+    private JButton createDisabledButton(String label, String tooltip) {
         JButton button = new JButton(label);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setEnabled(false);
-        button.setToolTipText("Non ancora disponibile");
+        button.setToolTipText(tooltip);
         UiTheme.styleMenuButton(button);
         return button;
     }
