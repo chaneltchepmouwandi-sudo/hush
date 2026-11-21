@@ -8,4 +8,6 @@ public class ItemData {
     public String roomId;
     public String unlockCode;
     public EffectData effect;
+    public String content;
+    public String knowledgeId;
 }

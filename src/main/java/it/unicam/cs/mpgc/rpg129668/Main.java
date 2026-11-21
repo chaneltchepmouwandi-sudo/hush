@@ -28,19 +28,28 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Main {
-    public static void main(String[] args) {
-        Level level = new LevelLoader().load("/content/level1.json");
-        NpcContent npcContent = new NpcLoader().load("/content/npcs.json", level.roomsById());
-        ItemContent itemContent = new ItemLoader().load("/content/items.json");
 
+    /**
+     * I contenuti di una partita: livello, NPC e oggetti. Vengono
+     * caricati da zero a ogni partita, perché alcuni hanno stato (le
+     * pillole contano i turni rimanenti del loro effetto) e non devono
+     * essere condivisi tra partite diverse.
+     */
+    private record GameContent(Level level, NpcContent npcs, ItemContent items) {}
+
+    public static void main(String[] args) {
         SaveRepository saveRepository = new JsonSaveRepository(Path.of("hush-save.json"));
         GameStateMapper mapper = new GameStateMapper();
 
-        Supplier<GameController> newGame = () -> buildController(level, npcContent, newGameState(level, itemContent));
+        Supplier<GameController> newGame = () -> {
+            GameContent content = loadContent();
+            return buildController(content, newGameState(content));
+        };
         Supplier<GameController> loadGame = () -> {
+            GameContent content = loadContent();
             GameSnapshot snapshot = saveRepository.load();
-            GameState state = mapper.fromSnapshot(snapshot, level.roomsById(), itemContent.itemsById());
-            return buildController(level, npcContent, state);
+            GameState state = mapper.fromSnapshot(snapshot, content.level().roomsById(), content.items().itemsById());
+            return buildController(content, state);
         };
         Consumer<GameController> onSave = controller -> saveRepository.save(mapper.toSnapshot(controller.getState()));
 
@@ -50,10 +59,18 @@ public class Main {
         });
     }
 
-    private static GameState newGameState(Level level, ItemContent itemContent) {
-        GameState state = new GameState(new Player("Protagonista", initialStats()), new Position(level.startingRoom()));
-        itemContent.itemsByRoomId().forEach((roomId, items) -> {
-            Room room = level.roomsById().get(roomId);
+    private static GameContent loadContent() {
+        Level level = new LevelLoader().load("/content/level1.json");
+        NpcContent npcs = new NpcLoader().load("/content/npcs.json", level.roomsById());
+        ItemContent items = new ItemLoader().load("/content/items.json");
+        return new GameContent(level, npcs, items);
+    }
+
+    private static GameState newGameState(GameContent content) {
+        GameState state = new GameState(new Player("Protagonista", initialStats()),
+                new Position(content.level().startingRoom()));
+        content.items().itemsByRoomId().forEach((roomId, items) -> {
+            Room room = content.level().roomsById().get(roomId);
             if (room != null) {
                 items.forEach(item -> state.placeItem(room, item));
             }
@@ -75,8 +92,8 @@ public class Main {
         return stats;
     }
 
-    private static GameController buildController(Level level, NpcContent npcContent, GameState state) {
-        return new GameController(state, List.of(), npcContent.npcs(), npcContent.requestsByNpcId(),
-                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(level.startingRoom()));
+    private static GameController buildController(GameContent content, GameState state) {
+        return new GameController(state, List.of(), content.npcs().npcs(), content.npcs().requestsByNpcId(),
+                new SameRoomDetectionRule(), new ReturnToRoomCapturePolicy(content.level().startingRoom()));
     }
 }

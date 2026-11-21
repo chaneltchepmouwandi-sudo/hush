@@ -1,7 +1,9 @@
 package it.unicam.cs.mpgc.rpg129668.ui.swing.panel;
 
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
+import it.unicam.cs.mpgc.rpg129668.core.action.GameAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.PickUpAction;
+import it.unicam.cs.mpgc.rpg129668.core.action.ReadAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TalkAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.TryUnlockAction;
 import it.unicam.cs.mpgc.rpg129668.core.action.UsePillAction;
@@ -10,6 +12,7 @@ import it.unicam.cs.mpgc.rpg129668.core.event.GameEvent;
 import it.unicam.cs.mpgc.rpg129668.core.model.character.Npc;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Pill;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Readable;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
 import it.unicam.cs.mpgc.rpg129668.ui.swing.UiTheme;
 
@@ -19,10 +22,10 @@ import java.util.List;
 
 /**
  * Pannello di gioco: vista grafica della stanza (GameCanvas), pannello
- * di stato laterale (StatusPanel), elenco degli NPC presenti con cui
- * parlare, elenco degli oggetti raccoglibili nella stanza, pulsanti
- * per aprire i passaggi bloccati e per usare le pillole in
- * inventario, un pulsante per salvare, e un log testuale degli eventi.
+ * di stato laterale (StatusPanel), pulsanti per parlare con gli NPC
+ * presenti, raccogliere gli oggetti della stanza, aprire i passaggi
+ * bloccati, usare le pillole e leggere i documenti in inventario, un
+ * pulsante per salvare, e un log testuale degli eventi.
  */
 public class GamePanel extends JPanel {
 
@@ -33,7 +36,7 @@ public class GamePanel extends JPanel {
     private final JPanel npcPanel = new JPanel(new FlowLayout());
     private final JPanel itemPanel = new JPanel(new FlowLayout());
     private final JPanel openPanel = new JPanel(new FlowLayout());
-    private final JPanel usePanel = new JPanel(new FlowLayout());
+    private final JPanel inventoryPanel = new JPanel(new FlowLayout());
     private final JTextArea logArea = new JTextArea();
 
     public GamePanel(GameController controller, Runnable onSave) {
@@ -48,14 +51,10 @@ public class GamePanel extends JPanel {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBackground(UiTheme.BACKGROUND);
-        npcPanel.setBackground(UiTheme.BACKGROUND);
-        itemPanel.setBackground(UiTheme.BACKGROUND);
-        openPanel.setBackground(UiTheme.BACKGROUND);
-        usePanel.setBackground(UiTheme.BACKGROUND);
-        topPanel.add(npcPanel);
-        topPanel.add(itemPanel);
-        topPanel.add(openPanel);
-        topPanel.add(usePanel);
+        for (JPanel panel : List.of(npcPanel, itemPanel, openPanel, inventoryPanel)) {
+            panel.setBackground(UiTheme.BACKGROUND);
+            topPanel.add(panel);
+        }
         add(topPanel, BorderLayout.NORTH);
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -76,6 +75,7 @@ public class GamePanel extends JPanel {
             onSave.run();
             logArea.append("Partita salvata.\n");
         });
+        saveButton.setFocusable(false);
         UiTheme.styleButton(saveButton);
         bottomPanel.add(saveButton, BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
@@ -96,32 +96,24 @@ public class GamePanel extends JPanel {
         updateNpcPanel();
         updateItemPanel();
         updateOpenPanel();
-        updateUsePanel();
+        updateInventoryPanel();
     }
 
     private void updateNpcPanel() {
         npcPanel.removeAll();
         for (Npc npc : controller.getNpcsInCurrentRoom()) {
-            JButton button = new JButton("Parla con " + npc.getName());
-            button.addActionListener(e -> controller.performAction(
+            npcPanel.add(createActionButton("Parla con " + npc.getName(),
                     new TalkAction(npc, controller.getRequestFor(npc))));
-            UiTheme.styleButton(button);
-            npcPanel.add(button);
         }
-        npcPanel.revalidate();
-        npcPanel.repaint();
+        refresh(npcPanel);
     }
 
     private void updateItemPanel() {
         itemPanel.removeAll();
         for (Item item : controller.getItemsInCurrentRoom()) {
-            JButton button = new JButton("Raccogli " + item.getName());
-            button.addActionListener(e -> controller.performAction(new PickUpAction(item.getId())));
-            UiTheme.styleButton(button);
-            itemPanel.add(button);
+            itemPanel.add(createActionButton("Raccogli " + item.getName(), new PickUpAction(item.getId())));
         }
-        itemPanel.revalidate();
-        itemPanel.repaint();
+        refresh(itemPanel);
     }
 
     private void updateOpenPanel() {
@@ -130,29 +122,42 @@ public class GamePanel extends JPanel {
         for (String direction : DIRECTIONS) {
             room.getExit(direction).ifPresent(exit -> {
                 if (!exit.isPassable()) {
-                    JButton button = new JButton("Apri verso " + direction);
-                    button.addActionListener(e -> controller.performAction(new TryUnlockAction(direction)));
-                    UiTheme.styleButton(button);
-                    openPanel.add(button);
+                    openPanel.add(createActionButton("Apri verso " + direction, new TryUnlockAction(direction)));
                 }
             });
         }
-        openPanel.revalidate();
-        openPanel.repaint();
+        refresh(openPanel);
     }
 
-    private void updateUsePanel() {
-        usePanel.removeAll();
+    private void updateInventoryPanel() {
+        inventoryPanel.removeAll();
         for (Item item : controller.getState().getItems()) {
             if (item instanceof Pill) {
-                JButton button = new JButton("Usa " + item.getName());
-                button.addActionListener(e -> controller.performAction(new UsePillAction(item.getId())));
-                UiTheme.styleButton(button);
-                usePanel.add(button);
+                inventoryPanel.add(createActionButton("Usa " + item.getName(), new UsePillAction(item.getId())));
+            }
+            if (item instanceof Readable) {
+                inventoryPanel.add(createActionButton("Leggi " + item.getName(), new ReadAction(item.getId())));
             }
         }
-        usePanel.revalidate();
-        usePanel.repaint();
+        refresh(inventoryPanel);
+    }
+
+    /**
+     * Crea un pulsante che esegue l'azione tramite il controller. Il
+     * pulsante non prende il focus, così la tastiera resta sulla vista
+     * della stanza e le frecce continuano a muovere il personaggio.
+     */
+    private JButton createActionButton(String label, GameAction action) {
+        JButton button = new JButton(label);
+        button.addActionListener(e -> controller.performAction(action));
+        button.setFocusable(false);
+        UiTheme.styleButton(button);
+        return button;
+    }
+
+    private void refresh(JPanel panel) {
+        panel.revalidate();
+        panel.repaint();
     }
 
     public void focusCanvas() {

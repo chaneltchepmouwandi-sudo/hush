@@ -37,6 +37,22 @@
           { "stat": "AGILITA", "amount": 1 }
         ]
       }
+    },
+    {
+      "id": "disegno-elio",
+      "name": "Disegno stropicciato",
+      "type": "document",
+      "roomId": "sala",
+      "content": "Un disegno fatto con i pastelli. Sul retro, in stampatello: LUCE ACCESA TUTTA LA NOTTE.",
+      "knowledgeId": "sa-luce-corridoio-nord"
+    },
+    {
+      "id": "modulo-trasferimento",
+      "name": "Modulo di trasferimento",
+      "type": "document",
+      "roomId": "ufficio",
+      "content": "Destinazione: ala nord. Autorizzato da: infermiera C. Data: la notte in cui è sparito tuo fratello.",
+      "knowledgeId": "sa-trasferimento-ala-nord"
     }
   ]
 }

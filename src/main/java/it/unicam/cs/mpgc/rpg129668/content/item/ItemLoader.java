@@ -5,6 +5,7 @@ import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
 import it.unicam.cs.mpgc.rpg129668.core.model.effect.Confusion;
 import it.unicam.cs.mpgc.rpg129668.core.model.effect.Effect;
 import it.unicam.cs.mpgc.rpg129668.core.model.effect.StatModifier;
+import it.unicam.cs.mpgc.rpg129668.core.model.item.Document;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.GenericItem;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Item;
 import it.unicam.cs.mpgc.rpg129668.core.model.item.Key;
@@ -22,14 +23,10 @@ import java.util.Map;
 
 /**
  * Carica gli oggetti raccoglibili da un file JSON, raggruppati per
- * stanza e indicizzati per id.
- *
- * TODO: supportare anche "document" quando servirà posizionarne nel
- *       mondo (per ora costruiti a mano nei test)
- * TODO: gli Effect delle pillole hanno stato (turni rimanenti) e sono
- *       condivisi tra le partite avviate nella stessa esecuzione: se
- *       si aggiungerà il ritorno al menu, crearne uno nuovo a ogni
- *       nuova partita
+ * stanza e indicizzati per id. Ogni chiamata a load() crea oggetti
+ * nuovi: va richiamato a ogni nuova partita, perché alcuni oggetti
+ * hanno stato (le pillole contano i turni rimanenti del loro effetto)
+ * e non devono essere condivisi tra partite.
  */
 public class ItemLoader {
 
@@ -66,6 +63,7 @@ public class ItemLoader {
             case "generic" -> new GenericItem(data.id, data.name, data.description);
             case "key" -> new Key(data.id, data.name, data.description, data.unlockCode);
             case "pill" -> new Pill(data.id, data.name, data.description, createEffect(data));
+            case "document" -> new Document(data.id, data.name, data.content, data.knowledgeId);
             default -> throw new IllegalArgumentException("Tipo di oggetto sconosciuto: " + data.type);
         };
     }

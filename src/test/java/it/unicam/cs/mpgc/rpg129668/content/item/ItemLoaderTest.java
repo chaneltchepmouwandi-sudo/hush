@@ -14,7 +14,7 @@ class ItemLoaderTest {
     void groupsItemsByRoom() {
         ItemContent content = new ItemLoader().load("/content/items.json");
         assertTrue(content.itemsByRoomId().containsKey("sala"));
-        assertEquals(2, content.itemsByRoomId().get("sala").size()); // peluche e pillola azzurra
+        assertEquals(3, content.itemsByRoomId().get("sala").size()); // peluche, pillola azzurra e disegno-elio
     }
 
     @Test
@@ -57,5 +57,17 @@ class ItemLoaderTest {
 
         assertEquals(1, stats.getEffectiveValue(Stat.PERCEZIONE));
         assertEquals(2, stats.getEffectiveValue(Stat.AGILITA));
+    }
+
+    @Test
+    void eachLoadCreatesIndependentPills() {
+        ItemLoader loader = new ItemLoader();
+        Pill first = (Pill) loader.load("/content/items.json").itemsById().get("pillola-azzurra");
+        Pill second = (Pill) loader.load("/content/items.json").itemsById().get("pillola-azzurra");
+
+        first.getEffect().tick();
+
+        assertEquals(5, first.getEffect().getRemainingTurns());
+        assertEquals(6, second.getEffect().getRemainingTurns());
     }
 }
