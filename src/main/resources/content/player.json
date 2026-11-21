@@ -1,0 +1,9 @@
+{
+  "name": "Protagonista",
+  "stats": {
+    "CARISMA": 2,
+    "FORZA": 1,
+    "PERCEZIONE": 3,
+    "AGILITA": 3
+  }
+}

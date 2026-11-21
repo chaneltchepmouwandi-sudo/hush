@@ -3,9 +3,10 @@ package it.unicam.cs.mpgc.rpg129668.core.model.world;
 /**
  * Qualcosa che blocca il passaggio tra due stanze, finché non viene
  * risolto (es. una porta chiusa a chiave, in futuro un enigma).
- *
- * TODO: valutare se sostituire il codice testuale con un tipo dedicato
- *       una volta introdotti gli oggetti in core.model.item (es. Key)
+ * L'ostacolo si risolve con un codice testuale e non con un riferimento
+ * a un oggetto (es. Key): così core.model.world non dipende da
+ * core.model.item, e anche un enigma può essere risolto con una
+ * risposta invece che con un oggetto.
  */
 public interface Obstacle {
 

@@ -12,6 +12,8 @@ import java.util.Map;
  * TODO: gli effetti attivi (es. una pillola ancora in corso) non
  *       vengono salvati per ora; dopo un caricamento sono considerati
  *       scaduti
+ * TODO: lo stato delle porte (aperta o chiusa) non viene salvato: dopo
+ *       un caricamento tornano chiuse, e la chiave resta nell'inventario
  */
 public class GameSnapshot {
     public String playerName;

@@ -1,12 +1,13 @@
 package it.unicam.cs.mpgc.rpg129668.core.model.item;
 
-import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.effect.Effect;
 
 /**
- * Una pillola che, se usata, applica un Effect a uno StatBlock.
- * Il tipo di effetto (aumento di una statistica, confusione, ...)
- * è deciso da chi la crea, non da questa classe.
+ * Una pillola: un oggetto che trasporta un Effect. Non lo applica da
+ * sola: quando il giocatore la usa, UsePillAction passa l'effetto a
+ * GameState, che lo applica e lo fa scadere dopo i turni previsti. Il
+ * tipo di effetto (aumento di una statistica, confusione, ...) è
+ * deciso da chi la crea, non da questa classe.
  */
 public class Pill implements Item {
 
@@ -35,10 +36,6 @@ public class Pill implements Item {
     @Override
     public String getDescription() {
         return description;
-    }
-
-    public void use(StatBlock stats) {
-        effect.apply(stats);
     }
 
     public Effect getEffect() {

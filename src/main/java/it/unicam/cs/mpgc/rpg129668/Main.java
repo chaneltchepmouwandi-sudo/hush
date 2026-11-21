@@ -6,10 +6,8 @@ import it.unicam.cs.mpgc.rpg129668.content.level.Level;
 import it.unicam.cs.mpgc.rpg129668.content.level.LevelLoader;
 import it.unicam.cs.mpgc.rpg129668.content.npc.NpcContent;
 import it.unicam.cs.mpgc.rpg129668.content.npc.NpcLoader;
+import it.unicam.cs.mpgc.rpg129668.content.player.PlayerLoader;
 import it.unicam.cs.mpgc.rpg129668.controller.GameController;
-import it.unicam.cs.mpgc.rpg129668.core.model.character.Player;
-import it.unicam.cs.mpgc.rpg129668.core.model.character.Stat;
-import it.unicam.cs.mpgc.rpg129668.core.model.character.StatBlock;
 import it.unicam.cs.mpgc.rpg129668.core.model.state.GameState;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Position;
 import it.unicam.cs.mpgc.rpg129668.core.model.world.Room;
@@ -66,8 +64,13 @@ public class Main {
         return new GameContent(level, npcs, items);
     }
 
+    /**
+     * Stato di una nuova partita: la protagonista con le statistiche
+     * iniziali definite in player.json, nella stanza di partenza, e gli
+     * oggetti posizionati nelle stanze.
+     */
     private static GameState newGameState(GameContent content) {
-        GameState state = new GameState(new Player("Protagonista", initialStats()),
+        GameState state = new GameState(new PlayerLoader().load("/content/player.json"),
                 new Position(content.level().startingRoom()));
         content.items().itemsByRoomId().forEach((roomId, items) -> {
             Room room = content.level().roomsById().get(roomId);
@@ -76,20 +79,6 @@ public class Main {
             }
         });
         return state;
-    }
-
-    /**
-     * Statistiche iniziali della protagonista.
-     *
-     * TODO: spostare i valori iniziali in un file JSON insieme al resto dei contenuti
-     */
-    private static StatBlock initialStats() {
-        StatBlock stats = new StatBlock();
-        stats.setBase(Stat.CARISMA, 2);
-        stats.setBase(Stat.FORZA, 1);
-        stats.setBase(Stat.PERCEZIONE, 3);
-        stats.setBase(Stat.AGILITA, 3);
-        return stats;
     }
 
     private static GameController buildController(GameContent content, GameState state) {
